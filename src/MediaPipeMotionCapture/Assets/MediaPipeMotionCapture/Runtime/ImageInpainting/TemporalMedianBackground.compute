@@ -1,0 +1,246 @@
+#pragma kernel UpdateBuffer
+#pragma kernel ComputeMedian
+#pragma kernel CaptureBackground
+#pragma kernel MaskDilateH
+#pragma kernel MaskDilateV
+
+// --- パラメータ ---
+int _Width;
+int _Height;
+int _BufferSize;       // リングバッファサイズ (例: 5)
+int _CurrentSlot;      // 現在書き込むスロット [0, _BufferSize)
+int _TotalFramesAdded; // 蓄積済みフレーム数
+float _MaskThreshold;  // 人物判定閾値 (0.3)
+int _MaskWidth;
+int _MaskHeight;
+float _MaskScale;      // マスクスケール (1.0 = 等倍, >1.0 で拡大)
+
+// --- Mask Dilation パラメータ ---
+int _DilationKernelRadius;    // カーネル半径 (例: radius=4 → 9x9 カーネル)
+float _DilationThreshold;     // 再閾値化の閾値 (例: 0.3)
+
+// --- テクスチャ ---
+Texture2D<float4> _CameraTex;
+RWTexture2D<float4> _BackgroundTex;
+
+// --- バッファ ---
+StructuredBuffer<float> _MaskBuffer;
+RWStructuredBuffer<float> _TempMask;     // 水平ブラー中間結果
+RWStructuredBuffer<float> _DilatedMask;  // 膨張済みマスク
+RWStructuredBuffer<uint> _RingBuffer;    // R8G8B8 を uint にパック: (R << 16) | (G << 8) | B
+RWStructuredBuffer<int> _ValidCount;     // 各ピクセルの有効フレーム数
+StructuredBuffer<float> _GaussWeights;   // ガウシアンカーネルの重み
+
+// -------------------------------------------------------
+// ユーティリティ
+// -------------------------------------------------------
+uint PackColor(float4 c)
+{
+    uint r = (uint)(saturate(c.r) * 255.0);
+    uint g = (uint)(saturate(c.g) * 255.0);
+    uint b = (uint)(saturate(c.b) * 255.0);
+    return (r << 16) | (g << 8) | b;
+}
+
+float4 UnpackColor(uint packed)
+{
+    float r = ((packed >> 16) & 0xFF) / 255.0;
+    float g = ((packed >>  8) & 0xFF) / 255.0;
+    float b = ( packed        & 0xFF) / 255.0;
+    return float4(r, g, b, 1.0);
+}
+
+// 挿入ソートして中央値を返す (N <= 9 程度を想定)
+// vals: 入力配列, count: 有効要素数
+// MAX_BUFFER_SIZE 分の配列を受け取る
+#define MAX_BUFFER_SIZE 9
+
+uint InsertionSortMedian(uint vals[MAX_BUFFER_SIZE], int count)
+{
+    // 挿入ソート
+    for (int i = 1; i < count; i++)
+    {
+        uint key = vals[i];
+        int j = i - 1;
+        while (j >= 0 && vals[j] > key)
+        {
+            vals[j + 1] = vals[j];
+            j--;
+        }
+        vals[j + 1] = key;
+    }
+    return vals[count / 2];
+}
+
+// マスク UV にスケールを適用してマスク値を取得
+float SampleMaskScaled(StructuredBuffer<float> maskBuf, float u, float v)
+{
+    // 中心からスケーリング
+    float su = (u - 0.5) / _MaskScale + 0.5;
+    float sv = (v - 0.5) / _MaskScale + 0.5;
+
+    // 範囲外はマスク値 0（背景）として扱う
+    if (su < 0.0 || su > 1.0 || sv < 0.0 || sv > 1.0)
+        return 0.0;
+
+    int mx = clamp((int)(su * _MaskWidth), 0, _MaskWidth - 1);
+    int my = clamp((int)(sv * _MaskHeight), 0, _MaskHeight - 1);
+    return maskBuf[my * _MaskWidth + mx];
+}
+
+// -------------------------------------------------------
+// Kernel 0: UpdateBuffer
+// 毎フレーム実行。人物でないピクセルをリングバッファに書き込む。
+// _MaskBuffer には C# 側からモードに応じて適切なバッファがバインドされる。
+// -------------------------------------------------------
+[numthreads(8, 8, 1)]
+void UpdateBuffer(uint3 id : SV_DispatchThreadID)
+{
+    if ((int)id.x >= _Width || (int)id.y >= _Height) return;
+
+    int pixelIdx = (int)id.y * _Width + (int)id.x;
+
+    // ピクセル位置を正規化 UV に変換してスケール付きでマスクをサンプリング
+    float u = (float)id.x / (float)_Width;
+    float v = (float)id.y / (float)_Height;
+    float maskValue = SampleMaskScaled(_MaskBuffer, u, v);
+
+    if (maskValue < _MaskThreshold)
+    {
+        float4 color = _CameraTex[id.xy];
+        uint packed = PackColor(color);
+
+        int bufferIdx = _CurrentSlot * _Width * _Height + pixelIdx;
+        _RingBuffer[bufferIdx] = packed;
+
+        int current = _ValidCount[pixelIdx];
+        if (current < _BufferSize)
+        {
+            _ValidCount[pixelIdx] = current + 1;
+        }
+    }
+}
+
+// -------------------------------------------------------
+// Kernel 1: ComputeMedian
+// N フレームおきに実行。各ピクセルで R/G/B メディアンを計算。
+// -------------------------------------------------------
+[numthreads(8, 8, 1)]
+void ComputeMedian(uint3 id : SV_DispatchThreadID)
+{
+    if ((int)id.x >= _Width || (int)id.y >= _Height) return;
+
+    int pixelIdx = (int)id.y * _Width + (int)id.x;
+
+    int usedSlots = min(_TotalFramesAdded, _BufferSize);
+    int count = min(_ValidCount[pixelIdx], usedSlots);
+    if (count == 0) return;
+
+    uint rVals[MAX_BUFFER_SIZE];
+    uint gVals[MAX_BUFFER_SIZE];
+    uint bVals[MAX_BUFFER_SIZE];
+
+    // リングバッファからチャンネル別に読み込み
+    for (int i = 0; i < count; i++)
+    {
+        int slot = i % _BufferSize;
+        uint packed = _RingBuffer[slot * _Width * _Height + pixelIdx];
+        rVals[i] = (packed >> 16) & 0xFF;
+        gVals[i] = (packed >>  8) & 0xFF;
+        bVals[i] =  packed        & 0xFF;
+    }
+
+    // 未使用スロットをゼロで初期化（ソートに影響しないように）
+    for (int k = count; k < MAX_BUFFER_SIZE; k++)
+    {
+        rVals[k] = 0;
+        gVals[k] = 0;
+        bVals[k] = 0;
+    }
+
+    uint medR = InsertionSortMedian(rVals, count);
+    uint medG = InsertionSortMedian(gVals, count);
+    uint medB = InsertionSortMedian(bVals, count);
+
+    _BackgroundTex[id.xy] = float4(medR / 255.0, medG / 255.0, medB / 255.0, 1.0);
+}
+
+// -------------------------------------------------------
+// Kernel 2: CaptureBackground
+// 事前撮影背景キャプチャ。カメラフレームを背景にコピーし、
+// リングバッファを初期化する。
+// -------------------------------------------------------
+[numthreads(8, 8, 1)]
+void CaptureBackground(uint3 id : SV_DispatchThreadID)
+{
+    if ((int)id.x >= _Width || (int)id.y >= _Height) return;
+
+    int pixelIdx = (int)id.y * _Width + (int)id.x;
+    float4 color = _CameraTex[id.xy];
+
+    _BackgroundTex[id.xy] = color;
+
+    uint packed = PackColor(color);
+    for (int i = 0; i < _BufferSize; i++)
+    {
+        _RingBuffer[i * _Width * _Height + pixelIdx] = packed;
+    }
+    _ValidCount[pixelIdx] = _BufferSize;
+}
+
+// -------------------------------------------------------
+// Kernel 3: MaskDilateH
+// マスクの水平方向ガウシアンブラー。
+// _MaskBuffer → _TempMask
+// -------------------------------------------------------
+[numthreads(64, 1, 1)]
+void MaskDilateH(uint3 id : SV_DispatchThreadID)
+{
+    if ((int)id.x >= _MaskWidth || (int)id.y >= _MaskHeight) return;
+
+    float sum = 0.0;
+    float weightSum = 0.0;
+
+    for (int dx = -_DilationKernelRadius; dx <= _DilationKernelRadius; dx++)
+    {
+        int sx = clamp((int)id.x + dx, 0, _MaskWidth - 1);
+        int idx = (int)id.y * _MaskWidth + sx;
+        float w = _GaussWeights[abs(dx)];
+        sum += _MaskBuffer[idx] * w;
+        weightSum += w;
+    }
+
+    int outIdx = (int)id.y * _MaskWidth + (int)id.x;
+    _TempMask[outIdx] = sum / weightSum;
+}
+
+// -------------------------------------------------------
+// Kernel 4: MaskDilateV
+// マスクの垂直方向ガウシアンブラー + 再閾値化。
+// _TempMask → _DilatedMask
+// -------------------------------------------------------
+[numthreads(1, 64, 1)]
+void MaskDilateV(uint3 id : SV_DispatchThreadID)
+{
+    if ((int)id.x >= _MaskWidth || (int)id.y >= _MaskHeight) return;
+
+    float sum = 0.0;
+    float weightSum = 0.0;
+
+    for (int dy = -_DilationKernelRadius; dy <= _DilationKernelRadius; dy++)
+    {
+        int sy = clamp((int)id.y + dy, 0, _MaskHeight - 1);
+        int idx = sy * _MaskWidth + (int)id.x;
+        float w = _GaussWeights[abs(dy)];
+        sum += _TempMask[idx] * w;
+        weightSum += w;
+    }
+
+    float blurred = sum / weightSum;
+
+    // 再閾値化: smoothstep で滑らかに遷移
+    float dilated = smoothstep(_DilationThreshold - 0.1, _DilationThreshold + 0.1, blurred);
+
+    int outIdx = (int)id.y * _MaskWidth + (int)id.x;
+    _DilatedMask[outIdx] = dilated;
+}
