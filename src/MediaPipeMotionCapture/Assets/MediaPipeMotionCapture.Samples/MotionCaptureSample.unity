@@ -334,7 +334,7 @@ MonoBehaviour:
     MinFaceDetectionConfidence: 0.5
     MinFacePresenceConfidence: 0.5
     MinFaceTrackingConfidence: 0.5
-    OutputSegmentationMasks: 0
+    OutputSegmentationMasks: 1
     EnableSmoothing: 1
     UsePerBodyPartParams: 1
     SmoothingMinCutoff: 1
@@ -430,6 +430,7 @@ GameObject:
   m_Component:
   - component: {fileID: 880970485}
   - component: {fileID: 880970486}
+  - component: {fileID: 880970487}
   - component: {fileID: 880970484}
   - component: {fileID: 880970483}
   - component: {fileID: 880970482}
@@ -530,13 +531,32 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 880970481}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 84a80930b077c4a18bc7a09653de01b0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _deviceCameraComponent: {fileID: 1886221646}
   _outputImage: {fileID: 25477012}
+--- !u!114 &880970487
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 880970481}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 96bd2eee0cec84350b157b69b7fc90c4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _motionCaptureTaskRunner: {fileID: 507209070}
+  _deviceCameraComponent: {fileID: 1886221646}
+  _outputImage: {fileID: 25477012}
+  _inpaintingShader: {fileID: 4800000, guid: bdfd58486e6274695b52e50e48243db5, type: 3}
+  _medianComputeShader: {fileID: 7200000, guid: 5e075cc4318104027a25bd33059ccb33, type: 3}
+  _medianBufferSize: 5
+  _medianUpdateInterval: 3
 --- !u!1 &1591719114
 GameObject:
   m_ObjectHideFlags: 0
