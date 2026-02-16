@@ -21,11 +21,13 @@ namespace MediaPipeMotionCapture
     public class HandData
     {
         public Vector3[] Landmarks { get; set; }
+        public Vector3[] NormalizedLandmarks { get; set; }
         public Handedness Handedness { get; set; }
 
         public HandData(Handedness handedness)
         {
             Landmarks = new Vector3[21];
+            NormalizedLandmarks = new Vector3[21];
             Handedness = handedness;
         }
     }

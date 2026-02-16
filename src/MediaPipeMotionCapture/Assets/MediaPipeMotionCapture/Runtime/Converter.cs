@@ -81,6 +81,20 @@ namespace MediaPipeMotionCapture
         }
 
         /// <summary>
+        /// HandLandmarkerResult の NormalizedLandmarks を HandData に格納する。
+        /// ポーズと同様に [0,1] 範囲、左上原点・Y下向きでそのまま格納する。
+        /// </summary>
+        public static void ConvertHandNormalizedLandmarks(NormalizedLandmarks normalizedLandmarks, HandData output)
+        {
+            var count = Mathf.Min(normalizedLandmarks.landmarks.Count, HandLandmarkCount);
+            for (var i = 0; i < count; i++)
+            {
+                var lm = normalizedLandmarks.landmarks[i];
+                output.NormalizedLandmarks[i] = new Vector3(lm.x, lm.y, lm.z);
+            }
+        }
+
+        /// <summary>
         /// MediaPipe の NormalizedLandmarks を PoseData に格納する。
         /// MediaPipe の Normalized Landmarks は [0,1] 範囲で、左上原点・Y下向き。
         /// そのまま格納する（Y反転はしない。逆射影時に考慮する）。

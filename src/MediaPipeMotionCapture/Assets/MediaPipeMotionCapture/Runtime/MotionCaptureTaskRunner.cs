@@ -274,6 +274,13 @@ namespace MediaPipeMotionCapture
                             poseWristPosition,
                             _leftHandData
                         );
+                        if (handResult.handLandmarks != null && i < handResult.handLandmarks.Count)
+                        {
+                            Converter.ConvertHandNormalizedLandmarks(
+                                handResult.handLandmarks[i],
+                                _leftHandData
+                            );
+                        }
                         _hasPendingLeftHand = true;
                     }
                     else
@@ -283,6 +290,13 @@ namespace MediaPipeMotionCapture
                             poseWristPosition,
                             _rightHandData
                         );
+                        if (handResult.handLandmarks != null && i < handResult.handLandmarks.Count)
+                        {
+                            Converter.ConvertHandNormalizedLandmarks(
+                                handResult.handLandmarks[i],
+                                _rightHandData
+                            );
+                        }
                         _hasPendingRightHand = true;
                     }
                 }
