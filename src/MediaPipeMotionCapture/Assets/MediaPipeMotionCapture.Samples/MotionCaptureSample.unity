@@ -148,7 +148,8 @@ RectTransform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 1208044284}
   m_Father: {fileID: 880970485}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -556,7 +557,79 @@ MonoBehaviour:
   _inpaintingShader: {fileID: 4800000, guid: bdfd58486e6274695b52e50e48243db5, type: 3}
   _medianComputeShader: {fileID: 7200000, guid: 5e075cc4318104027a25bd33059ccb33, type: 3}
   _medianBufferSize: 5
-  _medianUpdateInterval: 3
+  _sampleIntervalSec: 0.1
+  _medianIntervalSec: 0.3
+--- !u!1 &1208044283
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1208044284}
+  - component: {fileID: 1208044286}
+  - component: {fileID: 1208044285}
+  m_Layer: 5
+  m_Name: LandmarkOverlay
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &1208044284
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1208044283}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 25477011}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1208044285
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1208044283}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 642ea3ef37b434741af1bb2f46517f59, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  _motionCaptureTaskRunner: {fileID: 507209070}
+  _poseLandmarkColor: {r: 0, g: 1, b: 0.5, a: 1}
+  _poseConnectionColor: {r: 0, g: 0.8, b: 0.4, a: 0.8}
+  _poseLandmarkSize: 4
+  _poseConnectionWidth: 2
+  _poseVisibilityThreshold: 0.5
+  _leftHandColor: {r: 1, g: 0.4, b: 0.4, a: 1}
+  _rightHandColor: {r: 0.4, g: 0.4, b: 1, a: 1}
+  _handLandmarkSize: 3
+  _handConnectionWidth: 1.5
+--- !u!222 &1208044286
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1208044283}
+  m_CullTransparentMesh: 1
 --- !u!1 &1591719114
 GameObject:
   m_ObjectHideFlags: 0
