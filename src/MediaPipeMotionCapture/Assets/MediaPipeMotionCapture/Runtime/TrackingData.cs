@@ -34,7 +34,14 @@ namespace MediaPipeMotionCapture
 
     public class FaceData
     {
-        public const int BlendshapeCount = 52;
+        /// <summary>
+        /// The number of ARKit-compatible blendshapes.
+        /// The output from MediaPipe does not include “tongueOut”.
+        /// <br/>
+        /// References:
+        ///  - https://github.com/google-ai-edge/mediapipe/issues/4403#issuecomment-1546047950
+        /// </summary>
+        public const int BlendshapeCount = 51;
 
         public float[] Blendshapes { get; set; }
         public string[] BlendshapeNames { get; set; }
