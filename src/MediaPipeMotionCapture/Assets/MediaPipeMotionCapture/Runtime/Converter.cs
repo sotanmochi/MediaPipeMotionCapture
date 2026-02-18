@@ -64,8 +64,11 @@ namespace MediaPipeMotionCapture
         }
 
         /// <summary>
-        /// FaceBlendshapes (Classifications) から 52 個の ARKit 互換ブレンドシェイプを
-        /// FaceData に書き込む。index=0 の "_neutral" はスキップする。
+        /// FaceBlendshapes (Classifications) から 51 個の ARKit 互換のブレンドシェイプを FaceData に書き込む。
+        /// FaceBlendshapes (Classifications) には ARKit 互換のブレンドシェイプの "tongueOut" が含まれていない。
+        /// また、index=0 の "_neutral" はスキップする。
+        /// References:
+        ///   - https://github.com/google-ai-edge/mediapipe/issues/4403#issuecomment-1546047950
         /// </summary>
         public static void ConvertFaceBlendshapes(Classifications blendshapes, FaceData output)
         {
