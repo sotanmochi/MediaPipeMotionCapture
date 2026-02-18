@@ -86,6 +86,16 @@ namespace MediaPipeMotionCapture
             return true;
         }
 
+        public bool TryGetBoneTransform(HumanBodyBones bone, out Transform transform)
+        {
+            if (_skeleton == null || !_skeleton.BoneMap.TryGetValue(bone, out transform))
+            {
+                transform = null;
+                return false;
+            }
+            return true;
+        }
+
         private void Initialize()
         {
             if (_initialized) return;

@@ -13,6 +13,9 @@ namespace MediaPipeMotionCapture.Visualization
         [Header("Data Source")]
         [SerializeField] private MotionCaptureTaskRunner _motionCaptureTaskRunner;
 
+        [Header("Camera")]
+        [SerializeField] private bool _isFrontCamera;
+
         [Header("Pose Settings")]
         [SerializeField] private Color _poseLandmarkColor = new Color(0f, 1f, 0.5f, 1f);
         [SerializeField] private Color _poseConnectionColor = new Color(0f, 0.8f, 0.4f, 0.8f);
@@ -25,6 +28,12 @@ namespace MediaPipeMotionCapture.Visualization
         [SerializeField] private Color _rightHandColor = new Color(0.4f, 0.4f, 1f, 1f);
         [SerializeField] private float _handLandmarkSize = 3f;
         [SerializeField] private float _handConnectionWidth = 1.5f;
+
+        public bool IsFrontCamera
+        {
+            get => _isFrontCamera;
+            set => _isFrontCamera = value;
+        }
 
         private PoseData _poseData;
         private HandData _leftHandData;
@@ -105,9 +114,88 @@ namespace MediaPipeMotionCapture.Visualization
         /// </summary>
         private Vector2 NormalizedToLocal(Vector3 normalizedLandmark, Rect rect)
         {
-            float x = rect.xMin + normalizedLandmark.x * rect.width;
-            float y = rect.yMax - normalizedLandmark.y * rect.height; // Y反転: MediaPipe Y下向き → UI Y上向き
+            float nx = normalizedLandmark.x;
+            float ny = normalizedLandmark.y;
+            TransformToScreenCoordinates(ref nx, ref ny, _isFrontCamera);
+
+            float x = rect.xMin + nx * rect.width;
+            float y = rect.yMax - ny * rect.height; // Y反転: MediaPipe Y下向き → UI Y上向き
             return new Vector2(x, y);
+        }
+
+        /// <summary>
+        /// TODO: Fix bugs
+        /// </summary>
+        private static void TransformToScreenCoordinates(ref float nx, ref float ny, bool isFrontCamera)
+        {
+            if (isFrontCamera)
+            {
+                // ミラー済みセンサー座標 → 画面座標: unmirror → rotate → mirror
+                switch (Screen.orientation)
+                {
+                    case ScreenOrientation.LandscapeRight:
+                        // ミラー済みセンサー座標がそのまま画面座標と一致
+                        //
+                        nx = 1f - nx;
+                        ny = ny;
+                        break;
+                    case ScreenOrientation.Portrait:
+                        // (nx, ny) → (ny, 1-nx)
+                        // var tmpP = nx;
+                        // nx = ny;
+                        // ny = 1f - tmpP;
+                        var tmpP = nx;
+                        nx = ny;
+                        ny = tmpP;
+                        break;
+                    case ScreenOrientation.LandscapeLeft:
+                        // (nx, ny) → (1-nx, 1-ny)
+                        // nx = 1f - nx;
+                        // ny = 1f - ny;
+                        nx = nx;
+                        ny = 1f - ny;
+                        break;
+                    case ScreenOrientation.PortraitUpsideDown:
+                        // (nx, ny) → (1-ny, nx)
+                        // var tmpU = nx;
+                        // nx = 1f - ny;
+                        // ny = tmpU;
+                        nx = 1f - ny;
+                        ny = 1f - nx;
+                        break;
+                    default:
+                        break;
+                }
+            }
+            else
+            {
+                // センサー座標 → 画面座標: 回転のみ
+                switch (Screen.orientation)
+                {
+                    case ScreenOrientation.LandscapeLeft:
+                        // センサーと一致。変換不要
+                        break;
+                    case ScreenOrientation.Portrait:
+                        // 90度回転: (nx, ny) → (1-ny, nx)
+                        var tmpP = nx;
+                        nx = 1f - ny;
+                        ny = tmpP;
+                        break;
+                    case ScreenOrientation.LandscapeRight:
+                        // 180度回転: (nx, ny) → (1-nx, 1-ny)
+                        nx = 1f - nx;
+                        ny = 1f - ny;
+                        break;
+                    case ScreenOrientation.PortraitUpsideDown:
+                        // 270度回転: (nx, ny) → (ny, 1-nx)
+                        var tmpU = nx;
+                        nx = ny;
+                        ny = 1f - tmpU;
+                        break;
+                    default:
+                        break;
+                }
+            }
         }
 
         private void DrawLandmarks(VertexHelper vh, Vector3[] landmarks, float[] visibility,

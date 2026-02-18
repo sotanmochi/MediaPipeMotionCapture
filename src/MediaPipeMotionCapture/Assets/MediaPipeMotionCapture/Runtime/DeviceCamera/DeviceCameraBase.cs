@@ -17,5 +17,19 @@ namespace MediaPipeMotionCapture
         public abstract void SetFieldOfView(float fov, FieldOfViewType type);
         public abstract bool TryAcquireMediaPipeImage(out Image image, out int width, out int height);
         public abstract bool TryCreateImageFromCurrentBuffer(out Image image, out int width, out int height);
+
+        public virtual bool IsDepthAvailable => false;
+
+        public virtual bool TryGetDepthAt(float normalizedX, float normalizedY, out float depthMeters)
+        {
+            depthMeters = 0f;
+            return false;
+        }
+
+        public virtual bool TryNormalizedToWorldPoint(float normalizedX, float normalizedY, out Vector3 worldPosition)
+        {
+            worldPosition = Vector3.zero;
+            return false;
+        }
     }
 }
