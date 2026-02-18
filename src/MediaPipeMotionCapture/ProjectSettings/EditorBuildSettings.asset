@@ -5,9 +5,12 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
+  - enabled: 0
+    path: Assets/MediaPipeMotionCapture.ARFoundation/Samples/ARMotionCaptureSample.unity
+    guid: 4cfd54aefc5fe4b158f407df6571066e
   - enabled: 1
-    path: Assets/MediaPipeMotionCapture.ARFoundation/Samples/ARCamera.unity
-    guid: b864610c0b5c04488a1d68bb0b9e8964
+    path: Assets/MediaPipeMotionCapture.ARFoundation/Samples/MotionActorARCameraSample.unity
+    guid: 726972e66e1a244cd8018a0814f67e7d
   m_configObjects:
     UnityEditor.XR.ARCore.ARCoreSettings: {fileID: 11400000, guid: 42bc44f3bd02a4741ba83a31c8afcd54, type: 2}
     UnityEditor.XR.ARKit.ARKitSettings: {fileID: 11400000, guid: 2d30a1486ad7842a2b6168bb02293743, type: 2}
