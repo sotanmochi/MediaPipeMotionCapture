@@ -17,6 +17,24 @@ namespace MediaPipeMotionCapture
         void SetFieldOfView(float fov, FieldOfViewType type);
         bool TryAcquireMediaPipeImage(out Image image, out int width, out int height);
         bool TryCreateImageFromCurrentBuffer(out Image image, out int width, out int height);
+
+        /// <summary>
+        /// デプスマップが利用可能かどうか。
+        /// デプスセンサー非搭載デバイスや WebCamera では常に false。
+        /// </summary>
+        bool IsDepthAvailable { get; }
+
+        /// <summary>
+        /// 正規化座標 [0,1] の位置のデプス値（メートル）を取得する。
+        /// 座標系は MediaPipe NormalizedLandmark と同じ（左上原点、Y下向き）。
+        /// </summary>
+        bool TryGetDepthAt(float normalizedX, float normalizedY, out float depthMeters);
+
+        /// <summary>
+        /// 正規化座標 [0,1] の位置を 3D ワールド座標に変換する。
+        /// 内部でデプスマップからデプス値を取得し、カメラの射影行列を使って逆変換する。
+        /// </summary>
+        bool TryNormalizedToWorldPoint(float normalizedX, float normalizedY, out Vector3 worldPosition);
     }
 
     public static class DeviceCameraExtensions
