@@ -1,0 +1,20 @@
+{
+    "name": "MediaPipeMotionCapture.ARFoundation",
+    "rootNamespace": "MediaPipeMotionCapture.ARFoundation",
+    "references": [
+        "MediaPipeMotionCapture",
+        "Mediapipe.Runtime",
+        "Unity.XR.ARFoundation",
+        "Unity.XR.ARSubsystems",
+        "UniTask"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": true,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
