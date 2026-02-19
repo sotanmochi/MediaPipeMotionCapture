@@ -10,7 +10,6 @@ namespace MediaPipeMotionCapture
     public class HandTrackingTask : IDisposable
     {
         private HandLandmarker _landmarker;
-        private ImageProcessingOptions _imageProcessingOptions;
         private bool _isDisposed;
         private Action<HandLandmarkerResult> _resultCallback;
 
@@ -67,14 +66,13 @@ namespace MediaPipeMotionCapture
             );
 
             _landmarker = HandLandmarker.CreateFromOptions(options, GpuManager.GpuResources);
-            _imageProcessingOptions = new ImageProcessingOptions(rotationDegrees: 0);
 
             DebugLogger.Log($"[HandTrackingTask] Initialized (LIVE_STREAM). Delegate={delegateType}, Model={modelPath}");
         }
 
-        public void DetectAsync(Image image, long timestampMs)
+        public void DetectAsync(Image image, long timestampMs, int rotationDegrees = 0)
         {
-            _landmarker?.DetectAsync(image, timestampMs, _imageProcessingOptions);
+            _landmarker?.DetectAsync(image, timestampMs, new ImageProcessingOptions(rotationDegrees: rotationDegrees));
         }
 
         private void OnDetectionResult(HandLandmarkerResult result, Image image, long timestampMs)

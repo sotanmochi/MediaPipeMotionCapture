@@ -153,6 +153,8 @@ namespace MediaPipeMotionCapture.ARFoundation
 
             try
             {
+                // センサーネイティブ解像度で取得する（Portrait時もswapしない）。
+                // 回転は MediaPipe の ImageProcessingOptions.rotationDegrees で対応する。
                 width = cpuImage.width / _downscaleFactor;
                 height = cpuImage.height / _downscaleFactor;
 
@@ -166,11 +168,14 @@ namespace MediaPipeMotionCapture.ARFoundation
 
                 EnsureNativeBuffer(width, height);
 
-                // フロントカメラ使用時は水平反転（MirrorY）を行い、鏡像表示にする。
-                // リアカメラ使用時は変換なし。
-                var transformation = _arCameraManager.currentFacingDirection == CameraFacingDirection.User
-                    ? XRCpuImage.Transformation.MirrorY
-                    : XRCpuImage.Transformation.None;
+                // MirrorX: XRCpuImage.Convert() の出力は左下原点（Unity Texture2D 規約）だが
+                // MediaPipe は左上原点を期待するため、垂直反転が必須。
+                // MirrorY: フロントカメラ使用時は追加で水平反転（鏡像表示）。
+                var transformation = XRCpuImage.Transformation.MirrorX;
+                if (_arCameraManager.currentFacingDirection == CameraFacingDirection.User)
+                {
+                    transformation |= XRCpuImage.Transformation.MirrorY;
+                }
 
                 var conversionParams = new XRCpuImage.ConversionParams
                 {

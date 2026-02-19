@@ -10,7 +10,6 @@ namespace MediaPipeMotionCapture
     public class FaceTrackingTask : IDisposable
     {
         private FaceLandmarker _landmarker;
-        private ImageProcessingOptions _imageProcessingOptions;
         private bool _isDisposed;
         private Action<FaceLandmarkerResult> _resultCallback;
 
@@ -75,14 +74,13 @@ namespace MediaPipeMotionCapture
             );
 
             _landmarker = FaceLandmarker.CreateFromOptions(options, GpuManager.GpuResources);
-            _imageProcessingOptions = new ImageProcessingOptions(rotationDegrees: 0);
 
             DebugLogger.Log($"[FaceTrackingTask] Initialized (LIVE_STREAM). Delegate={delegateType}, Model={modelPath}, Blendshapes={OutputFaceBlendshapes}, TransformMatrix={OutputFaceTransformationMatrixes}");
         }
 
-        public void DetectAsync(Image image, long timestampMs)
+        public void DetectAsync(Image image, long timestampMs, int rotationDegrees = 0)
         {
-            _landmarker?.DetectAsync(image, timestampMs, _imageProcessingOptions);
+            _landmarker?.DetectAsync(image, timestampMs, new ImageProcessingOptions(rotationDegrees: rotationDegrees));
         }
 
         private void OnDetectionResult(FaceLandmarkerResult result, Image image, long timestampMs)

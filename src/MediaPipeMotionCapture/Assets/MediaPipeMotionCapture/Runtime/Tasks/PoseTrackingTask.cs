@@ -10,7 +10,6 @@ namespace MediaPipeMotionCapture
     public class PoseTrackingTask : IDisposable
     {
         private PoseLandmarker _landmarker;
-        private ImageProcessingOptions _imageProcessingOptions;
         private bool _isDisposed;
         private Action<PoseLandmarkerResult> _resultCallback;
 
@@ -71,14 +70,13 @@ namespace MediaPipeMotionCapture
             );
 
             _landmarker = PoseLandmarker.CreateFromOptions(options, GpuManager.GpuResources);
-            _imageProcessingOptions = new ImageProcessingOptions(rotationDegrees: 0);
 
             DebugLogger.Log($"[PoseTrackingTask] Initialized (LIVE_STREAM). Delegate={delegateType}, Model={modelPath}");
         }
 
-        public void DetectAsync(Image image, long timestampMs)
+        public void DetectAsync(Image image, long timestampMs, int rotationDegrees = 0)
         {
-            _landmarker?.DetectAsync(image, timestampMs, _imageProcessingOptions);
+            _landmarker?.DetectAsync(image, timestampMs, new ImageProcessingOptions(rotationDegrees: rotationDegrees));
         }
 
         private void OnDetectionResult(PoseLandmarkerResult result, Image image, long timestampMs)

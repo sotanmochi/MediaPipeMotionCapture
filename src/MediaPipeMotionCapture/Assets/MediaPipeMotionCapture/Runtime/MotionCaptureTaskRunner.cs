@@ -146,16 +146,17 @@ namespace MediaPipeMotionCapture
             }
 
             long timestampMs = _stopwatch.ElapsedMilliseconds;
-            _poseTask.DetectAsync(image, timestampMs);
+            int rotationDegrees = GetScreenRotationDegrees();
+            _poseTask.DetectAsync(image, timestampMs, rotationDegrees);
 
             if (_deviceCamera.TryCreateImageFromCurrentBuffer(out var handImage, out _, out _))
             {
-                _handTask.DetectAsync(handImage, timestampMs);
+                _handTask.DetectAsync(handImage, timestampMs, rotationDegrees);
             }
 
             if (_deviceCamera.TryCreateImageFromCurrentBuffer(out var faceImage, out _, out _))
             {
-                _faceTask.DetectAsync(faceImage, timestampMs);
+                _faceTask.DetectAsync(faceImage, timestampMs, rotationDegrees);
             }
 
             bool hasPose, hasLeftHand, hasRightHand, hasFace, hasSegMask;
@@ -326,6 +327,23 @@ namespace MediaPipeMotionCapture
                     DebugLogger.Log($"[{nameof(MotionCaptureTaskRunner)}] Face detected. HeadPos: {_faceData.HeadPosition}, HeadRot: {_faceData.HeadRotation.eulerAngles}");
                 }
             }
+        }
+
+        /// <summary>
+        /// Screen.orientation からセンサー画像に適用すべき回転角度 (度, 時計回り) を返す。
+        /// XRCpuImage はセンサーネイティブの Landscape 画像を出力するため、
+        /// Portrait 時は 90°、LandscapeRight 時は 180° 等の補正が必要。
+        /// ※ 実機検証後に値を調整すること。
+        /// </summary>
+        private static int GetScreenRotationDegrees()
+        {
+            return Screen.orientation switch
+            {
+                ScreenOrientation.Portrait           =>  90,
+                ScreenOrientation.LandscapeRight     => 180,
+                ScreenOrientation.PortraitUpsideDown => 270,
+                _                                    =>   0, // LandscapeLeft
+            };
         }
 
         private void EnsureSegmentationBuffer(int width, int height)
