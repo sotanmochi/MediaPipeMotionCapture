@@ -116,6 +116,8 @@ namespace MediaPipeMotionCapture.Visualization
         {
             float nx = normalizedLandmark.x;
             float ny = normalizedLandmark.y;
+
+            // WIP
             TransformToScreenCoordinates(ref nx, ref ny, _isFrontCamera);
 
             float x = rect.xMin + nx * rect.width;

@@ -10,6 +10,7 @@ namespace MediaPipeMotionCapture.ARFoundation.Samples
         None,
         XROrigin,
         ARCamera,
+        XRCpuImage,
         BodyAnchorTracker,
         MotionActorHips,
     }
@@ -18,7 +19,7 @@ namespace MediaPipeMotionCapture.ARFoundation.Samples
     {
         [SerializeField] private DebugUIView _debugUIView;
         [SerializeField] private GameObject _xrOrigin;
-        [SerializeField] private GameObject _arCamera;
+        [SerializeField] private ARCamera _arCamera;
         [SerializeField] private ARDepthBodyAnchorTracker _bodyAnchorTracker;
         [SerializeField] private MediaPipeMotionActor _motionActor;
 
@@ -64,6 +65,23 @@ namespace MediaPipeMotionCapture.ARFoundation.Samples
                 var sb = new System.Text.StringBuilder();
                 sb.AppendLine($"Position: {_arCamera.transform.position}");
                 sb.AppendLine($"Rotation: {_arCamera.transform.rotation.eulerAngles}");
+                _debugUIView.SetDebugInfo(debugTitle, sb.ToString());
+            }
+            else if (_currentDebugInfo == DebugInfoType.XRCpuImage)
+            {
+                _debugUIView.SetButtonText("Show Next Info");
+                var debugTitle = "XRCpuImage Info";
+                var sb = new System.Text.StringBuilder();
+                if (_arCamera.TryAcquireLatestCpuImage(out var cpuImage))
+                {
+                    sb.AppendLine($"Width: {cpuImage.width}");
+                    sb.AppendLine($"Height: {cpuImage.height}");
+                    cpuImage.Dispose();
+                }
+                else
+                {
+                    sb.AppendLine("Failed to acquire CPU image.");
+                }
                 _debugUIView.SetDebugInfo(debugTitle, sb.ToString());
             }
             else if (_currentDebugInfo == DebugInfoType.BodyAnchorTracker)

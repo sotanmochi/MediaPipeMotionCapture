@@ -130,6 +130,13 @@ namespace MediaPipeMotionCapture.ARFoundation
             DebugLogger.Log($"[{nameof(ARCamera)}] SetFieldOfView is not supported for AR camera. FOV is managed by AR Foundation.");
         }
 
+        public bool TryAcquireLatestCpuImage(out XRCpuImage cpuImage)
+        {
+            cpuImage = default;
+            if (_arCameraManager == null) return false;
+            return _arCameraManager.TryAcquireLatestCpuImage(out cpuImage);
+        }
+
         public override bool TryAcquireMediaPipeImage(out Image image, out int width, out int height)
         {
             image = null;
@@ -251,6 +258,8 @@ namespace MediaPipeMotionCapture.ARFoundation
             // センサー座標系 → スクリーン座標系の変換
             float screenNx = normalizedX;
             float screenNy = normalizedY;
+
+            // WIP
             TransformSensorToScreenCoordinates(ref screenNx, ref screenNy, IsFrontFacing);
 
             // スクリーン正規化座標 (左上原点, Y下向き) → Viewport 座標系 (左下原点, Y上向き)

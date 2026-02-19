@@ -573,7 +573,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 22400762, guid: 67117722a812a2e46ab8cb8eafbf5f5e, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0.00008010864
+      value: 0.000034332275
       objectReference: {fileID: 0}
     - target: {fileID: 22426080, guid: 67117722a812a2e46ab8cb8eafbf5f5e, type: 3}
       propertyPath: m_AnchorMax.x
@@ -1112,6 +1112,78 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 489425549}
   m_CullTransparentMesh: 1
+--- !u!1 &595296176
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 595296177}
+  - component: {fileID: 595296179}
+  - component: {fileID: 595296178}
+  m_Layer: 5
+  m_Name: LandmarkOverlay
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &595296177
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 595296176}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 866529958}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &595296178
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 595296176}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 642ea3ef37b434741af1bb2f46517f59, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  _motionCaptureTaskRunner: {fileID: 1623936241}
+  _isFrontCamera: 0
+  _poseLandmarkColor: {r: 0, g: 1, b: 0.5, a: 1}
+  _poseConnectionColor: {r: 0, g: 0.8, b: 0.4, a: 0.8}
+  _poseLandmarkSize: 4
+  _poseConnectionWidth: 2
+  _poseVisibilityThreshold: 0.5
+  _leftHandColor: {r: 1, g: 0.4, b: 0.4, a: 1}
+  _rightHandColor: {r: 0.4, g: 0.4, b: 1, a: 1}
+  _handLandmarkSize: 3
+  _handConnectionWidth: 1.5
+--- !u!222 &595296179
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 595296176}
+  m_CullTransparentMesh: 1
 --- !u!1 &620036045
 GameObject:
   m_ObjectHideFlags: 0
@@ -1339,13 +1411,14 @@ GameObject:
   - component: {fileID: 866529958}
   - component: {fileID: 866529960}
   - component: {fileID: 866529959}
+  - component: {fileID: 866529961}
   m_Layer: 5
   m_Name: InpaintingOutput
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &866529958
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1357,13 +1430,14 @@ RectTransform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 595296177}
   m_Father: {fileID: 1735783011}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 100, y: 100}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &866529959
 MonoBehaviour:
@@ -1400,6 +1474,26 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 866529957}
   m_CullTransparentMesh: 1
+--- !u!114 &866529961
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 866529957}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 96bd2eee0cec84350b157b69b7fc90c4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _motionCaptureTaskRunner: {fileID: 1623936241}
+  _deviceCameraComponent: {fileID: 1623936239}
+  _outputImage: {fileID: 866529959}
+  _inpaintingShader: {fileID: 4800000, guid: bdfd58486e6274695b52e50e48243db5, type: 3}
+  _medianComputeShader: {fileID: 7200000, guid: 5e075cc4318104027a25bd33059ccb33, type: 3}
+  _medianBufferSize: 5
+  _sampleIntervalSec: 0.1
+  _medianIntervalSec: 0.3
 --- !u!1 &1097861454
 GameObject:
   m_ObjectHideFlags: 0
@@ -1619,7 +1713,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1256726678
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1831,7 +1925,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1283029029}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 816b289ef451e094f9ae174fb4cf8db0, type: 3}
   m_Name: 
@@ -1969,7 +2063,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _debugUIView: {fileID: 1525089133}
   _xrOrigin: {fileID: 1424294340}
-  _arCamera: {fileID: 1283029029}
+  _arCamera: {fileID: 1623936239}
   _bodyAnchorTracker: {fileID: 1251621529}
   _motionActor: {fileID: 1251621525}
 --- !u!1 &1580100668
